@@ -23,4 +23,6 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - `TriggerDispatcher`: esecuzione isolata per trigger, esito registrato nello storico senza mai loggare segreti.
 - Edge-trigger + cooldown: `TriggerStateMachine` pura (transizione falso→vero, cooldown anti-rimbalzo, opzione "ripeti finché vera ogni N secondi"); pipeline completa polling → regole → trigger in `RuleEngineResponseHandler` con log delle transizioni.
 - 8 unit test JVM su edge-trigger/cooldown (`TriggerStateMachineTest`).
+- Modalità browser kiosk: WebView full-screen (JavaScript, DOM storage, adattamento viewport, zoom), gestione errori con retry, reload automatico opzionale a intervalli, immersive mode con ripristino all'uscita, FAB rapidi monitor↔browser.
+- Anti-standby: `FLAG_KEEP_SCREEN_ON` guidato da impostazione; `SettingsRepository` reattivo (SharedPreferences + StateFlow) per URL dashboard e reload.
 - Scaffold iniziale del progetto: Kotlin, Jetpack Compose (Material 3), Gradle Kotlin DSL, Room, OkHttp, kotlinx.serialization.

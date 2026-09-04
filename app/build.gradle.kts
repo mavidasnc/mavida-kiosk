@@ -18,8 +18,8 @@ android {
         minSdk = 26
         targetSdk = 35
         // Semantic Versioning: vedi CHANGELOG.md. versionCode cresce SEMPRE.
-        versionCode = 6
-        versionName = "0.1.5"
+        versionCode = 7
+        versionName = "0.1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

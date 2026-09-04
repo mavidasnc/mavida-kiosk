@@ -2,6 +2,7 @@ package it.mavida.dashboardalert
 
 import android.content.Context
 import it.mavida.dashboardalert.data.SecretsStore
+import it.mavida.dashboardalert.data.SettingsRepository
 import it.mavida.dashboardalert.data.db.AppDatabase
 import it.mavida.dashboardalert.data.repository.LogRepository
 import it.mavida.dashboardalert.data.repository.MonitorRepository
@@ -28,6 +29,7 @@ class AppContainer(context: Context) {
     val secretsStore: SecretsStore = SecretsStore(context)
     val monitorRepository: MonitorRepository = MonitorRepository(database, secretsStore)
     val logRepository: LogRepository = LogRepository(database)
+    val settingsRepository: SettingsRepository = SettingsRepository(context)
 
     /**
      * Client OkHttp condiviso: connection pool e dispatcher unici per tutta

@@ -14,6 +14,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import it.mavida.dashboardalert.AppContainer
+import it.mavida.dashboardalert.ui.browser.BrowserScreen
+import it.mavida.dashboardalert.ui.browser.BrowserViewModel
 import it.mavida.dashboardalert.ui.monitors.MonitorEditScreen
 import it.mavida.dashboardalert.ui.monitors.MonitorEditViewModel
 import it.mavida.dashboardalert.ui.monitors.MonitorListScreen
@@ -63,8 +65,13 @@ fun AppNavHost(container: AppContainer) {
             )
             MonitorEditScreen(viewModel = vm, onBack = { navController.popBackStack() })
         }
-        // Placeholder: implementati nelle fasi successive (browser kiosk, log, impostazioni).
-        composable(Routes.BROWSER) { PlaceholderScreen("Modalita' browser — in arrivo") }
+        composable(Routes.BROWSER) {
+            val vm: BrowserViewModel = viewModel(
+                factory = viewModelFactory { BrowserViewModel(container.settingsRepository) },
+            )
+            BrowserScreen(viewModel = vm, onBack = { navController.popBackStack() })
+        }
+        // Placeholder: implementati nelle fasi successive (log, impostazioni).
         composable(Routes.LOG) { PlaceholderScreen("Storico eventi — in arrivo") }
         composable(Routes.SETTINGS) { PlaceholderScreen("Impostazioni — in arrivo") }
     }
