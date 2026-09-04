@@ -13,8 +13,13 @@ import android.app.NotificationManager
  */
 class DashboardAlertApp : Application() {
 
+    /** Grafo delle dipendenze (DI manuale), accessibile da Activity/Service. */
+    lateinit var container: AppContainer
+        private set
+
     override fun onCreate() {
         super.onCreate()
+        container = AppContainer(this)
         createNotificationChannels()
     }
 
