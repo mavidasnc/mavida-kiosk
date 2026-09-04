@@ -1,0 +1,9 @@
+// Build radice: qui dichiariamo solo i plugin, senza applicarli.
+// Le versioni sono centralizzate in gradle/libs.versions.toml (version catalog).
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.ksp) apply false
+}
