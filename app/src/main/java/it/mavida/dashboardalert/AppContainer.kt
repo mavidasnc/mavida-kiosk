@@ -6,8 +6,8 @@ import it.mavida.dashboardalert.data.db.AppDatabase
 import it.mavida.dashboardalert.data.repository.LogRepository
 import it.mavida.dashboardalert.data.repository.MonitorRepository
 import it.mavida.dashboardalert.polling.HttpPoller
-import it.mavida.dashboardalert.polling.LoggingResponseHandler
 import it.mavida.dashboardalert.polling.ResponseHandler
+import it.mavida.dashboardalert.polling.RuleEngineResponseHandler
 import it.mavida.dashboardalert.trigger.FullScreenAlertTrigger
 import it.mavida.dashboardalert.trigger.HttpCallTrigger
 import it.mavida.dashboardalert.trigger.NotificationTrigger
@@ -42,8 +42,10 @@ class AppContainer(context: Context) {
 
     val httpPoller: HttpPoller = HttpPoller(okHttpClient, monitorRepository)
 
-    /** Pipeline post-polling: per ora solo logging; regole e trigger arrivano dopo. */
-    val responseHandler: ResponseHandler = LoggingResponseHandler(logRepository)
+    /** Pipeline post-polling: log -> regole -> trigger (edge/cooldown). */
+    val responseHandler: ResponseHandler by lazy {
+        RuleEngineResponseHandler(logRepository, triggerDispatcher)
+    }
 
     // --- Trigger (spec §3.3): interfaccia comune + implementazioni v1 ---
 

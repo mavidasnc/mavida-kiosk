@@ -21,4 +21,6 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - 12 unit test JVM sul rule engine (`RuleEngineTest`).
 - Sistema di trigger con interfaccia comune `Trigger`: chiamata HTTP in uscita (con templating `{{monitor}}/{{status}}/{{error}}/{{timestamp}}/{{body}}/{{json:$.path}}`), riproduzione MP3 da URI SAF (MediaPlayer, canale alarm, stop), notifica di sistema, vibrazione con pattern, avviso full-screen con fade-out (`AlertActivity` sopra lockscreen, lanciata via full-screen intent).
 - `TriggerDispatcher`: esecuzione isolata per trigger, esito registrato nello storico senza mai loggare segreti.
+- Edge-trigger + cooldown: `TriggerStateMachine` pura (transizione falso→vero, cooldown anti-rimbalzo, opzione "ripeti finché vera ogni N secondi"); pipeline completa polling → regole → trigger in `RuleEngineResponseHandler` con log delle transizioni.
+- 8 unit test JVM su edge-trigger/cooldown (`TriggerStateMachineTest`).
 - Scaffold iniziale del progetto: Kotlin, Jetpack Compose (Material 3), Gradle Kotlin DSL, Room, OkHttp, kotlinx.serialization.
