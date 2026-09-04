@@ -1,6 +1,7 @@
 package it.mavida.dashboardalert
 
 import android.content.Context
+import it.mavida.dashboardalert.data.ConfigTransfer
 import it.mavida.dashboardalert.data.SecretsStore
 import it.mavida.dashboardalert.data.SettingsRepository
 import it.mavida.dashboardalert.data.db.AppDatabase
@@ -30,6 +31,7 @@ class AppContainer(context: Context) {
     val monitorRepository: MonitorRepository = MonitorRepository(database, secretsStore)
     val logRepository: LogRepository = LogRepository(database)
     val settingsRepository: SettingsRepository = SettingsRepository(context)
+    val configTransfer: ConfigTransfer = ConfigTransfer(monitorRepository)
 
     /**
      * Client OkHttp condiviso: connection pool e dispatcher unici per tutta

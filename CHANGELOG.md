@@ -26,4 +26,6 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Modalità browser kiosk: WebView full-screen (JavaScript, DOM storage, adattamento viewport, zoom), gestione errori con retry, reload automatico opzionale a intervalli, immersive mode con ripristino all'uscita, FAB rapidi monitor↔browser.
 - Anti-standby: `FLAG_KEEP_SCREEN_ON` guidato da impostazione; `SettingsRepository` reattivo (SharedPreferences + StateFlow) per URL dashboard e reload.
 - UI di configurazione regole e trigger nell'editor monitor: editor per ogni tipo di condizione e di trigger, policy edge/cooldown/ripeti, selettore MP3 via SAF con permesso URI persistente.
+- Import/export della configurazione in JSON via SAF (`ConfigTransfer`, formato versionato, sostituzione completa al ripristino; header segreti esclusi dall'export).
+- Schermata storico eventi (risposte, esiti regole, trigger scattati con timestamp, livello, dettagli; svuotamento e rotazione automatica a 2000 voci).
 - Scaffold iniziale del progetto: Kotlin, Jetpack Compose (Material 3), Gradle Kotlin DSL, Room, OkHttp, kotlinx.serialization.

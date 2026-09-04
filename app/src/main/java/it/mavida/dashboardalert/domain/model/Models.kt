@@ -173,6 +173,7 @@ sealed class TriggerConfig {
 // ---------------------------------------------------------------------------
 
 /** Definizione di un trigger agganciato a una regola, con la sua policy di ripetizione. */
+@Serializable
 data class TriggerDef(
     val id: Long = 0,
     val ruleId: Long = 0,
@@ -187,6 +188,7 @@ data class TriggerDef(
 )
 
 /** Regola di valutazione della risposta di un monitor. */
+@Serializable
 data class Rule(
     val id: Long = 0,
     val monitorId: Long = 0,
@@ -197,6 +199,7 @@ data class Rule(
 )
 
 /** Configurazione completa di un monitor di polling. */
+@Serializable
 data class Monitor(
     val id: Long = 0,
     val name: String,

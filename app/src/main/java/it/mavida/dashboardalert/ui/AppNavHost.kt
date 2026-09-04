@@ -1,12 +1,6 @@
 package it.mavida.dashboardalert.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,10 +10,14 @@ import androidx.navigation.navArgument
 import it.mavida.dashboardalert.AppContainer
 import it.mavida.dashboardalert.ui.browser.BrowserScreen
 import it.mavida.dashboardalert.ui.browser.BrowserViewModel
+import it.mavida.dashboardalert.ui.log.LogScreen
+import it.mavida.dashboardalert.ui.log.LogViewModel
 import it.mavida.dashboardalert.ui.monitors.MonitorEditScreen
 import it.mavida.dashboardalert.ui.monitors.MonitorEditViewModel
 import it.mavida.dashboardalert.ui.monitors.MonitorListScreen
 import it.mavida.dashboardalert.ui.monitors.MonitorListViewModel
+import it.mavida.dashboardalert.ui.settings.SettingsScreen
+import it.mavida.dashboardalert.ui.settings.SettingsViewModel
 
 /** Rotte di navigazione dell'app. */
 object Routes {
@@ -71,15 +69,20 @@ fun AppNavHost(container: AppContainer) {
             )
             BrowserScreen(viewModel = vm, onBack = { navController.popBackStack() })
         }
-        // Placeholder: implementati nelle fasi successive (log, impostazioni).
-        composable(Routes.LOG) { PlaceholderScreen("Storico eventi — in arrivo") }
-        composable(Routes.SETTINGS) { PlaceholderScreen("Impostazioni — in arrivo") }
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(text: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text, style = MaterialTheme.typography.titleMedium)
+        // Placeholder sostituiti dalle schermate reali.
+        composable(Routes.LOG) {
+            val vm: LogViewModel = viewModel(
+                factory = viewModelFactory { LogViewModel(container.logRepository) },
+            )
+            LogScreen(viewModel = vm, onBack = { navController.popBackStack() })
+        }
+        composable(Routes.SETTINGS) {
+            val vm: SettingsViewModel = viewModel(
+                factory = viewModelFactory {
+                    SettingsViewModel(container.settingsRepository, container.configTransfer)
+                },
+            )
+            SettingsScreen(viewModel = vm, onBack = { navController.popBackStack() })
+        }
     }
 }
