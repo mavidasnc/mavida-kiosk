@@ -13,4 +13,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Storage cifrato dei segreti (header sensibili) con EncryptedSharedPreferences: i valori segreti non finiscono nel DB né nei log.
 - CRUD completo dei monitor con UI Compose: lista con switch abilita/disabilita, editor con URL/metodo/header/body/intervallo/timeout/retry.
 - Tema Material 3 scuro di default con tipografia ingrandita (leggibilità a distanza).
+- `PollingService` foreground (tipo dataSync, notifica persistente, START_STICKY, partial WakeLock): un loop a coroutine indipendente per ogni monitor abilitato, riavvio selettivo dei loop quando la configurazione cambia.
+- `HttpPoller` su OkHttp: metodi/header/body arbitrari, timeout per monitor, retry con backoff esponenziale; segreti risolti solo in memoria e mai loggati.
+- `BootReceiver`: avvia il service al boot (eccezione alle restrizioni di background start).
+- Richiesta runtime del permesso `POST_NOTIFICATIONS` (Android 13+).
 - Scaffold iniziale del progetto: Kotlin, Jetpack Compose (Material 3), Gradle Kotlin DSL, Room, OkHttp, kotlinx.serialization.
