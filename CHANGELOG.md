@@ -17,4 +17,6 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - `HttpPoller` su OkHttp: metodi/header/body arbitrari, timeout per monitor, retry con backoff esponenziale; segreti risolti solo in memoria e mai loggati.
 - `BootReceiver`: avvia il service al boot (eccezione alle restrizioni di background start).
 - Richiesta runtime del permesso `POST_NOTIFICATIONS` (Android 13+).
+- Rule engine puro (nessuna dipendenza Android): interfaccia estensibile `RuleCondition` con condizioni status code (=, !=, range), JSONPath (==, !=, >, <, >=, <=, contains via Jayway), regex sul body, contains/not contains, errore/timeout/nessuna risposta. Eccezioni mai propagate: input malformato = condizione falsa.
+- 12 unit test JVM sul rule engine (`RuleEngineTest`).
 - Scaffold iniziale del progetto: Kotlin, Jetpack Compose (Material 3), Gradle Kotlin DSL, Room, OkHttp, kotlinx.serialization.
