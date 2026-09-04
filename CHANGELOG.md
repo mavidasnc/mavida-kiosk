@@ -19,4 +19,6 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Richiesta runtime del permesso `POST_NOTIFICATIONS` (Android 13+).
 - Rule engine puro (nessuna dipendenza Android): interfaccia estensibile `RuleCondition` con condizioni status code (=, !=, range), JSONPath (==, !=, >, <, >=, <=, contains via Jayway), regex sul body, contains/not contains, errore/timeout/nessuna risposta. Eccezioni mai propagate: input malformato = condizione falsa.
 - 12 unit test JVM sul rule engine (`RuleEngineTest`).
+- Sistema di trigger con interfaccia comune `Trigger`: chiamata HTTP in uscita (con templating `{{monitor}}/{{status}}/{{error}}/{{timestamp}}/{{body}}/{{json:$.path}}`), riproduzione MP3 da URI SAF (MediaPlayer, canale alarm, stop), notifica di sistema, vibrazione con pattern, avviso full-screen con fade-out (`AlertActivity` sopra lockscreen, lanciata via full-screen intent).
+- `TriggerDispatcher`: esecuzione isolata per trigger, esito registrato nello storico senza mai loggare segreti.
 - Scaffold iniziale del progetto: Kotlin, Jetpack Compose (Material 3), Gradle Kotlin DSL, Room, OkHttp, kotlinx.serialization.

@@ -8,6 +8,12 @@ import it.mavida.dashboardalert.data.repository.MonitorRepository
 import it.mavida.dashboardalert.polling.HttpPoller
 import it.mavida.dashboardalert.polling.LoggingResponseHandler
 import it.mavida.dashboardalert.polling.ResponseHandler
+import it.mavida.dashboardalert.trigger.FullScreenAlertTrigger
+import it.mavida.dashboardalert.trigger.HttpCallTrigger
+import it.mavida.dashboardalert.trigger.NotificationTrigger
+import it.mavida.dashboardalert.trigger.SoundAlertManager
+import it.mavida.dashboardalert.trigger.TriggerDispatcher
+import it.mavida.dashboardalert.trigger.VibrationTrigger
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 
@@ -38,4 +44,17 @@ class AppContainer(context: Context) {
 
     /** Pipeline post-polling: per ora solo logging; regole e trigger arrivano dopo. */
     val responseHandler: ResponseHandler = LoggingResponseHandler(logRepository)
+
+    // --- Trigger (spec §3.3): interfaccia comune + implementazioni v1 ---
+
+    val soundAlertManager = SoundAlertManager(context)
+
+    val triggerDispatcher = TriggerDispatcher(
+        httpCallTrigger = HttpCallTrigger(okHttpClient, monitorRepository),
+        soundAlertManager = soundAlertManager,
+        notificationTrigger = NotificationTrigger(context),
+        vibrationTrigger = VibrationTrigger(context),
+        fullScreenAlertTrigger = FullScreenAlertTrigger(context),
+        logRepository = logRepository,
+    )
 }

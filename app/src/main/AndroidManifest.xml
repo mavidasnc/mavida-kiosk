@@ -41,6 +41,15 @@
             </intent-filter>
         </activity>
 
+        <!-- Avviso a schermo pieno: sopra lockscreen e a schermo spento (kiosk) -->
+        <activity
+            android:name=".ui.alert.AlertActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:launchMode="singleTop"
+            android:excludeFromRecents="true" />
+
         <!-- Service di polling in foreground: sopravvive con app in background -->
         <service
             android:name=".polling.PollingService"
