@@ -7,6 +7,11 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-09-04
+
+### Fixed
+- Setup dashboard (modalità browser): box URL più compatto (96dp con scroll interno) e schermata scorrevole, così è utilizzabile anche in orientamento orizzontale (prima i pulsanti uscivano dallo schermo).
+
 ## [0.2.1] - 2026-09-04
 
 ### Added

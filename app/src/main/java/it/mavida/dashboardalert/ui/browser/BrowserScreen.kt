@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
@@ -154,16 +156,23 @@ private fun BrowserSetupScreen(
     var reload by remember { mutableStateOf(initialReload.toString()) }
     var rotation by remember { mutableStateOf(initialRotation.toString()) }
 
+    // Scroll verticale: senza, in orientamento orizzontale i campi in basso
+    // (e i pulsanti) uscirebbero dallo schermo rendendoli irraggiungibili.
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("Configura le dashboard", style = MaterialTheme.typography.headlineMedium)
         OutlinedTextField(
             value = urlsText,
             onValueChange = { urlsText = it },
             label = { Text("URL delle dashboard (uno per riga)") },
-            modifier = Modifier.fillMaxWidth().height(140.dp),
+            // Altezza contenuta: il campo ha scroll interno se gli URL
+            // superano le righe visibili (comodo soprattutto in landscape).
+            modifier = Modifier.fillMaxWidth().height(96.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
         )
         OutlinedTextField(
