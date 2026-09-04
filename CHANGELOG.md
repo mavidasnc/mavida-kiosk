@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-04
+
 ### Added
 - Persistenza Room: entity `Monitor`, `Rule`, `Trigger`, `LogEntry` (con FK a cascata), DAO, database e repository (MVVM + Repository).
 - Modelli di dominio serializzabili (kotlinx.serialization): condizioni delle regole e configurazioni dei trigger come gerarchie sealed con discriminatore "type".
