@@ -176,58 +176,15 @@ fun MonitorEditScreen(
             // --- Header personalizzati (anche per l'autenticazione) ---
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "Header personalizzati",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.weight(1f),
-                        )
-                        IconButton(onClick = viewModel::addHeader) {
-                            Icon(Icons.Default.Add, contentDescription = "Aggiungi header")
-                        }
-                    }
-                    draft.headers.forEach { header ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            OutlinedTextField(
-                                value = header.name,
-                                onValueChange = { v ->
-                                    viewModel.updateHeader(header.id) { it.copy(name = v) }
-                                },
-                                label = { Text("Nome") },
-                                modifier = Modifier.weight(1f),
-                                singleLine = true,
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            OutlinedTextField(
-                                value = header.value,
-                                onValueChange = { v ->
-                                    viewModel.updateHeader(header.id) { it.copy(value = v) }
-                                },
-                                label = {
-                                    // Se segreto e gia' salvato, il valore e' vuoto:
-                                    // inserirne uno nuovo lo sovrascrive nello storage cifrato.
-                                    Text(if (header.secret) "Valore (cifrato)" else "Valore")
-                                },
-                                modifier = Modifier.weight(1.2f),
-                                singleLine = true,
-                            )
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Checkbox(
-                                    checked = header.secret,
-                                    onCheckedChange = { v ->
-                                        viewModel.updateHeader(header.id) { it.copy(secret = v) }
-                                    },
-                                )
-                                Text("Segreto", style = MaterialTheme.typography.labelLarge)
-                            }
-                            IconButton(onClick = { viewModel.removeHeader(header.id) }) {
-                                Icon(Icons.Default.Close, contentDescription = "Rimuovi header")
-                            }
-                        }
-                        Spacer(Modifier.height(8.dp))
-                    }
+                    HeaderListEditor(
+                        headers = draft.headers,
+                        onChange = { headers -> viewModel.update { it.copy(headers = headers) } },
+                    )
                 }
             }
+
+            // --- Regole e trigger (spec §3.2 / §3.3) ---
+            RulesSection(viewModel = viewModel, rules = draft.rules)
 
             Button(
                 onClick = viewModel::save,

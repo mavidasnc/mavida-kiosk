@@ -3,8 +3,12 @@ package it.mavida.dashboardalert.ui.monitors
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import it.mavida.dashboardalert.data.repository.MonitorRepository
+import it.mavida.dashboardalert.domain.model.ConditionParams
 import it.mavida.dashboardalert.domain.model.HeaderEntry
 import it.mavida.dashboardalert.domain.model.Monitor
+import it.mavida.dashboardalert.domain.model.Rule
+import it.mavida.dashboardalert.domain.model.TriggerConfig
+import it.mavida.dashboardalert.domain.model.TriggerDef
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,6 +62,55 @@ class MonitorEditViewModel(
 
     fun removeHeader(id: String) {
         _draft.update { m -> m.copy(headers = m.headers.filterNot { it.id == id }) }
+    }
+
+    // --- Regole e trigger (editing per indice: gli id DB arrivano al salvataggio) ---
+
+    fun addRule() {
+        _draft.update { m ->
+            m.copy(rules = m.rules + Rule(name = "", condition = ConditionParams.StatusCode()))
+        }
+    }
+
+    fun updateRule(index: Int, transform: (Rule) -> Rule) {
+        _draft.update { m ->
+            m.copy(rules = m.rules.mapIndexed { i, r -> if (i == index) transform(r) else r })
+        }
+    }
+
+    fun removeRule(index: Int) {
+        _draft.update { m -> m.copy(rules = m.rules.filterIndexed { i, _ -> i != index }) }
+    }
+
+    fun addTrigger(ruleIndex: Int) {
+        updateRule(ruleIndex) { r ->
+            r.copy(
+                triggers = r.triggers + TriggerDef(
+                    config = TriggerConfig.Notify(
+                        title = "Avviso",
+                        message = "Regola scattata su {{monitor}}",
+                    ),
+                ),
+            )
+        }
+    }
+
+    fun updateTrigger(
+        ruleIndex: Int,
+        triggerIndex: Int,
+        transform: (TriggerDef) -> TriggerDef,
+    ) {
+        updateRule(ruleIndex) { r ->
+            r.copy(
+                triggers = r.triggers.mapIndexed { i, t -> if (i == triggerIndex) transform(t) else t },
+            )
+        }
+    }
+
+    fun removeTrigger(ruleIndex: Int, triggerIndex: Int) {
+        updateRule(ruleIndex) { r ->
+            r.copy(triggers = r.triggers.filterIndexed { i, _ -> i != triggerIndex })
+        }
     }
 
     fun save() {
