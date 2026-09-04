@@ -10,12 +10,16 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# grep -P richiede una locale UTF-8/unibyte: forziamo C per portabilita' (Git Bash su Windows).
+export LC_ALL=C
+
 BUMP="${1:-patch}"
 GRADLE_FILE="app/build.gradle.kts"
 
 # --- Leggi versione corrente dal build file ---
-current_code=$(grep -oP 'versionCode = \K[0-9]+' "$GRADLE_FILE")
-current_name=$(grep -oP 'versionName = "\K[0-9.]+' "$GRADLE_FILE")
+# grep -P non e' affidabile su Git Bash/Windows: estrazione con sed (portabile).
+current_code=$(sed -n 's/.*versionCode = \([0-9][0-9]*\).*/\1/p' "$GRADLE_FILE" | head -1)
+current_name=$(sed -n 's/.*versionName = "\([0-9.]*\)".*/\1/p' "$GRADLE_FILE" | head -1)
 
 new_code=$((current_code + 1))
 IFS='.' read -r major minor patch <<< "$current_name"
