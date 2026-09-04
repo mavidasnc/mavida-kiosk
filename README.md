@@ -97,7 +97,10 @@ Su versioni più vecchie: collega una volta via USB, poi
 6. Salva e abilita il monitor: il servizio di polling parte da solo.
 
 Per il kiosk: icona **globo** nella barra in alto → inserisci l'URL della
-dashboard HTML → "Avvia browser".
+dashboard HTML (o più URL, uno per riga, con rotazione automatica) → "Avvia
+browser". Per **modificare** gli URL in seguito: nel kiosk tocca il FAB con
+l'**ingranaggio** (in basso a destra) e riapri la configurazione, che
+precarica gli URL già salvati.
 
 ## Note su stabilità 24/7 e limiti noti
 

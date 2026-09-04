@@ -7,6 +7,11 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-04
+
+### Added
+- Modalità browser kiosk: pulsante "Configura dashboard" (ingranaggio) nei FAB del kiosk per modificare URL/reload/rotazione senza cancellare i dati dell'app; la schermata di setup precarica gli URL già salvati.
+
 ## [0.2.0] - 2026-09-04
 
 ### Added

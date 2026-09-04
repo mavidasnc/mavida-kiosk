@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -84,19 +85,26 @@ fun BrowserScreen(
 ) {
     val settings by viewModel.settings.collectAsState()
 
+    // true quando l'utente chiede esplicitamente di riconfigurare gli URL
+    // dal kiosk (altrimenti, una volta salvati, il setup non riapparirebbe piu').
+    var showSetup by remember { mutableStateOf(false) }
+
     // Immersive mode solo in questa schermata: uscendo si ripristina la UI normale.
     ImmersiveEffect()
 
-    if (settings.browserUrls.isEmpty()) {
+    if (settings.browserUrls.isEmpty() || showSetup) {
         BrowserSetupScreen(
+            initialUrls = settings.browserUrls,
             initialReload = settings.browserReloadSeconds,
             initialRotation = settings.browserRotationSeconds,
             onSave = { urls, reload, rotation ->
                 viewModel.saveUrls(urls)
                 viewModel.setReloadSeconds(reload)
                 viewModel.setRotationSeconds(rotation)
+                showSetup = false
             },
-            onBack = onBack,
+            // Se esistono gia' URL, "Annulla" torna al kiosk, non alla home.
+            onBack = if (settings.browserUrls.isEmpty()) onBack else ({ showSetup = false }),
         )
     } else {
         KioskWebView(
@@ -104,6 +112,7 @@ fun BrowserScreen(
             reloadSeconds = settings.browserReloadSeconds,
             rotationSeconds = settings.browserRotationSeconds,
             onBack = onBack,
+            onConfigure = { showSetup = true },
         )
     }
 }
@@ -131,12 +140,17 @@ private fun ImmersiveEffect() {
 /** Configurazione delle dashboard: un URL per riga (rotazione, spec §3.6). */
 @Composable
 private fun BrowserSetupScreen(
+    initialUrls: List<String>,
     initialReload: Int,
     initialRotation: Int,
     onSave: (List<String>, Int, Int) -> Unit,
     onBack: () -> Unit,
 ) {
-    var urlsText by remember { mutableStateOf("https://") }
+    // Precarica gli URL gia' salvati (uno per riga), cosi' la riconfigurazione
+    // parte dallo stato attuale invece che da un campo vuoto.
+    var urlsText by remember {
+        mutableStateOf(if (initialUrls.isEmpty()) "https://" else initialUrls.joinToString("\n"))
+    }
     var reload by remember { mutableStateOf(initialReload.toString()) }
     var rotation by remember { mutableStateOf(initialRotation.toString()) }
 
@@ -198,6 +212,7 @@ private fun KioskWebView(
     reloadSeconds: Int,
     rotationSeconds: Int,
     onBack: () -> Unit,
+    onConfigure: () -> Unit,
 ) {
     var webView by remember { mutableStateOf<WebView?>(null) }
     var loadError by remember { mutableStateOf<String?>(null) }
@@ -301,6 +316,10 @@ private fun KioskWebView(
             }
             SmallFloatingActionButton(onClick = { reloadTick++ }) {
                 Icon(Icons.Default.Refresh, contentDescription = "Ricarica")
+            }
+            // Riconfigura gli URL/reload/rotazione senza uscire dal kiosk.
+            SmallFloatingActionButton(onClick = onConfigure) {
+                Icon(Icons.Default.Settings, contentDescription = "Configura dashboard")
             }
             SmallFloatingActionButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Torna ai monitor")
