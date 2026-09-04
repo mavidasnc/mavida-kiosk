@@ -69,8 +69,46 @@ class PollingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.getBooleanExtra(EXTRA_FROM_BOOT, false) == true) {
+            bringAppToFrontBestEffort()
+        }
         // START_STICKY: riavvio automatico se il sistema termina il processo.
         return START_STICKY
+    }
+
+    /**
+     * Best effort per riportare l'UI in primo piano dopo il boot (spec §3.5).
+     *
+     * Limite documentato: da Android 10+ un'app non puo' avviare un'Activity
+     * da background in modo affidabile. L'unico meccanismo concesso e' la
+     * notifica con full-screen intent, che il sistema mostra a schermo acceso.
+     * Su Android 14+ il permesso "notifiche a schermo intero" puo' richiedere
+     * l'abilitazione manuale (Impostazioni > App > Accesso speciale).
+     * Per un kiosk vero e proprio la via robusta resta impostare l'app come
+     * launcher o usare una MDM/kiosk mode.
+     */
+    private fun bringAppToFrontBestEffort() {
+        val launchIntent = Intent(this, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            launchIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val notification = NotificationCompat.Builder(this, DashboardAlertApp.CHANNEL_ALERTS)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("Dashboard & Alert avviato")
+            .setContentText("Monitoraggio riavviato dopo il boot")
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setFullScreenIntent(pendingIntent, true)
+            .setAutoCancel(true)
+            .build()
+        runCatching {
+            val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+            manager.notify(BOOT_NOTIFICATION_ID, notification)
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -203,11 +241,14 @@ class PollingService : Service() {
 
     companion object {
         private const val NOTIFICATION_ID = 1
+        private const val BOOT_NOTIFICATION_ID = 2
         private const val WAKELOCK_TAG = "dashboardalert:polling"
+        private const val EXTRA_FROM_BOOT = "it.mavida.dashboardalert.extra.FROM_BOOT"
 
         /** Avvia il service (da UI in foreground o dal BootReceiver). */
-        fun start(context: Context) {
+        fun start(context: Context, fromBoot: Boolean = false) {
             val intent = Intent(context, PollingService::class.java)
+                .putExtra(EXTRA_FROM_BOOT, fromBoot)
             context.startForegroundService(intent)
         }
 

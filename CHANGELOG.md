@@ -28,4 +28,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - UI di configurazione regole e trigger nell'editor monitor: editor per ogni tipo di condizione e di trigger, policy edge/cooldown/ripeti, selettore MP3 via SAF con permesso URI persistente.
 - Import/export della configurazione in JSON via SAF (`ConfigTransfer`, formato versionato, sostituzione completa al ripristino; header segreti esclusi dall'export).
 - Schermata storico eventi (risposte, esiti regole, trigger scattati con timestamp, livello, dettagli; svuotamento e rotazione automatica a 2000 voci).
+- Boot autostart: `BootReceiver` avvia il service e fa best effort per l'UI via full-screen intent (limiti Android 10+/14+ documentati nei commenti).
+- Esenzione ottimizzazione batteria: richiesta in-app con stato; rilevamento OEM (EMUI, MIUI, ColorOS/OxygenOS, One UI, Funtouch + fallback) con istruzioni guidate in-app.
+- PIN opzionale anti-modifiche accidentali: hash salted SHA-256, tastierino full-screen, blocco manuale dalla lista monitor.
+- Dimming notturno a fasce orarie con controllo luminosità della finestra (anche a cavallo di mezzanotte).
 - Scaffold iniziale del progetto: Kotlin, Jetpack Compose (Material 3), Gradle Kotlin DSL, Room, OkHttp, kotlinx.serialization.

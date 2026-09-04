@@ -20,7 +20,7 @@ class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            PollingService.start(context)
+            PollingService.start(context, fromBoot = true)
         }
     }
 }

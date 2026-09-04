@@ -36,6 +36,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import it.mavida.dashboardalert.data.ConfigTransfer
 import it.mavida.dashboardalert.data.SettingsRepository
+import it.mavida.dashboardalert.system.PinLock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -63,6 +64,23 @@ class SettingsViewModel(
     val message: StateFlow<String?> = _message.asStateFlow()
 
     fun setKeepScreenOn(enabled: Boolean) = settingsRepository.setKeepScreenOn(enabled)
+
+    fun setPin(pin: String) {
+        settingsRepository.setPinHash(PinLock.hashFor(pin))
+        _message.value = "PIN impostato. Alla prossima apertura l'app sara' bloccata."
+    }
+
+    fun clearPin(currentPin: String) {
+        if (PinLock.verify(currentPin)) {
+            settingsRepository.setPinHash(null)
+            _message.value = "PIN rimosso."
+        } else {
+            _message.value = "PIN errato: non rimosso."
+        }
+    }
+
+    fun setNightMode(enabled: Boolean, start: Int, end: Int, brightness: Int) =
+        settingsRepository.setNightMode(enabled, start, end, brightness)
 
     /** Prepara il JSON di export: la UI lo scrive poi sul file scelto via SAF. */
     fun prepareExport() {
@@ -182,6 +200,18 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
                     Switch(checked = settings.keepScreenOn, onCheckedChange = viewModel::setKeepScreenOn)
                 }
             }
+
+            // --- Esenzione ottimizzazione batteria (spec §3.5) ---
+            BatteryCard()
+
+            // --- Istruzioni specifiche per il produttore (OEM) ---
+            OemCard()
+
+            // --- PIN anti-modifiche accidentali ---
+            PinCard(viewModel, pinSet = settings.pinHash != null)
+
+            // --- Tema notturno / dimming a fasce orarie ---
+            NightModeCard(viewModel, settings)
 
             // --- Backup / ripristino ---
             Card(modifier = Modifier.fillMaxWidth()) {

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import it.mavida.dashboardalert.domain.model.Monitor
+import it.mavida.dashboardalert.system.PinLock
 
 /**
  * Schermata principale: lista dei monitor configurati.
@@ -55,6 +57,12 @@ fun MonitorListScreen(
             TopAppBar(
                 title = { Text("Dashboard & Alert") },
                 actions = {
+                    // "Blocca ora": visibile solo se il PIN e' impostato (spec §3.6).
+                    if (PinLock.isPinSet) {
+                        IconButton(onClick = { PinLock.lock() }) {
+                            Icon(Icons.Default.Lock, contentDescription = "Blocca con PIN")
+                        }
+                    }
                     IconButton(onClick = onOpenBrowser) {
                         Icon(Icons.Default.Public, contentDescription = "Modalita' browser")
                     }
