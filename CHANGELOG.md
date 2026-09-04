@@ -32,4 +32,6 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Esenzione ottimizzazione batteria: richiesta in-app con stato; rilevamento OEM (EMUI, MIUI, ColorOS/OxygenOS, One UI, Funtouch + fallback) con istruzioni guidate in-app.
 - PIN opzionale anti-modifiche accidentali: hash salted SHA-256, tastierino full-screen, blocco manuale dalla lista monitor.
 - Dimming notturno a fasce orarie con controllo luminosità della finestra (anche a cavallo di mezzanotte).
+- Rilevamento perdita di connettività del dispositivo (`ConnectivityObserver` su ConnectivityManager, transizioni loggate nello storico), complementare alla condizione "errore/timeout/nessuna risposta" del rule engine.
+- Rotazione automatica tra più dashboard in modalità browser (lista URL, intervallo configurabile, indicatore posizione).
 - Scaffold iniziale del progetto: Kotlin, Jetpack Compose (Material 3), Gradle Kotlin DSL, Room, OkHttp, kotlinx.serialization.

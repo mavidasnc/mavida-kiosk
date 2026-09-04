@@ -14,6 +14,7 @@ import it.mavida.dashboardalert.DashboardAlertApp
 import it.mavida.dashboardalert.MainActivity
 import it.mavida.dashboardalert.data.repository.LogRepository
 import it.mavida.dashboardalert.domain.model.Monitor
+import it.mavida.dashboardalert.system.ConnectivityObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -51,6 +52,7 @@ class PollingService : Service() {
 
     private var configObserver: Job? = null
     private var wakeLock: PowerManager.WakeLock? = null
+    private var connectivityObserver: ConnectivityObserver? = null
 
     private lateinit var poller: HttpPoller
     private lateinit var responseHandler: ResponseHandler
@@ -66,6 +68,10 @@ class PollingService : Service() {
         startForegroundWithNotification(activeMonitors = 0)
         acquireWakeLock()
         observeMonitorChanges()
+
+        // Rilevamento perdita di connettivita' del dispositivo (spec §3.6).
+        connectivityObserver = ConnectivityObserver(this, logRepository, serviceScope)
+            .also { it.start() }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -114,6 +120,7 @@ class PollingService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        connectivityObserver?.stop()
         configObserver?.cancel()
         serviceScope.cancel()
         releaseWakeLock()

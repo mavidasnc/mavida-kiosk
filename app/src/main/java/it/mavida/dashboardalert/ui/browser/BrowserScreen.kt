@@ -13,17 +13,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -44,16 +44,17 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import it.mavida.dashboardalert.data.SettingsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import androidx.lifecycle.viewModelScope
 
 /**
- * Modalita' browser kiosk (spec §3.4): WebView a schermo intero per un
- * cruscotto HTML online, con immersive mode e reload automatico opzionale.
+ * Modalita' browser kiosk (spec §3.4): WebView a schermo intero per uno o
+ * piu' cruscotti HTML online, con immersive mode, reload automatico opzionale
+ * e rotazione tra piu' dashboard (spec §3.6).
  *
  * Note di compatibilita': la versione di Android System WebView varia molto
  * tra dispositivi (spec §3.4). Abilitiamo solo API web mature e stabili;
@@ -67,12 +68,12 @@ class BrowserViewModel(
     val settings: StateFlow<SettingsRepository.Settings> = settingsRepository.settings
         .stateIn(viewModelScope, SharingStarted.Eagerly, SettingsRepository.Settings())
 
-    fun saveUrl(url: String) {
-        // La rotazione multi-URL arriva nella fase dedicata; qui un solo URL.
-        settingsRepository.setBrowserUrls(if (url.isBlank()) emptyList() else listOf(url.trim()))
+    fun saveUrls(urls: List<String>) {
+        settingsRepository.setBrowserUrls(urls.map { it.trim() }.filter { it.startsWith("http") })
     }
 
     fun setReloadSeconds(seconds: Int) = settingsRepository.setBrowserReloadSeconds(seconds)
+    fun setRotationSeconds(seconds: Int) = settingsRepository.setBrowserRotationSeconds(seconds)
 }
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -82,24 +83,26 @@ fun BrowserScreen(
     onBack: () -> Unit,
 ) {
     val settings by viewModel.settings.collectAsState()
-    val url = settings.browserUrls.firstOrNull().orEmpty()
 
     // Immersive mode solo in questa schermata: uscendo si ripristina la UI normale.
     ImmersiveEffect()
 
-    if (url.isBlank()) {
+    if (settings.browserUrls.isEmpty()) {
         BrowserSetupScreen(
             initialReload = settings.browserReloadSeconds,
-            onSave = { newUrl, reload ->
-                viewModel.saveUrl(newUrl)
+            initialRotation = settings.browserRotationSeconds,
+            onSave = { urls, reload, rotation ->
+                viewModel.saveUrls(urls)
                 viewModel.setReloadSeconds(reload)
+                viewModel.setRotationSeconds(rotation)
             },
             onBack = onBack,
         )
     } else {
         KioskWebView(
-            url = url,
+            urls = settings.browserUrls,
             reloadSeconds = settings.browserReloadSeconds,
+            rotationSeconds = settings.browserRotationSeconds,
             onBack = onBack,
         )
     }
@@ -125,27 +128,28 @@ private fun ImmersiveEffect() {
     }
 }
 
-/** Prima configurazione dell'URL del cruscotto. */
+/** Configurazione delle dashboard: un URL per riga (rotazione, spec §3.6). */
 @Composable
 private fun BrowserSetupScreen(
     initialReload: Int,
-    onSave: (String, Int) -> Unit,
+    initialRotation: Int,
+    onSave: (List<String>, Int, Int) -> Unit,
     onBack: () -> Unit,
 ) {
-    var url by remember { mutableStateOf("https://") }
+    var urlsText by remember { mutableStateOf("https://") }
     var reload by remember { mutableStateOf(initialReload.toString()) }
+    var rotation by remember { mutableStateOf(initialRotation.toString()) }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
     ) {
-        Text("Configura il cruscotto", style = MaterialTheme.typography.headlineMedium)
+        Text("Configura le dashboard", style = MaterialTheme.typography.headlineMedium)
         OutlinedTextField(
-            value = url,
-            onValueChange = { url = it },
-            label = { Text("URL della dashboard") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
+            value = urlsText,
+            onValueChange = { urlsText = it },
+            label = { Text("URL delle dashboard (uno per riga)") },
+            modifier = Modifier.fillMaxWidth().height(140.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
         )
         OutlinedTextField(
@@ -156,33 +160,48 @@ private fun BrowserSetupScreen(
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
+        OutlinedTextField(
+            value = rotation,
+            onValueChange = { rotation = it.filter(Char::isDigit) },
+            label = { Text("Rotazione tra dashboard (secondi)") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(onClick = onBack) { Text("Annulla") }
             Button(
-                onClick = { onSave(url, reload.toIntOrNull() ?: 0) },
-                enabled = url.startsWith("http"),
+                onClick = {
+                    onSave(
+                        urlsText.lines().filter { it.isNotBlank() },
+                        reload.toIntOrNull() ?: 0,
+                        rotation.toIntOrNull() ?: 30,
+                    )
+                },
+                enabled = urlsText.lines().any { it.trim().startsWith("http") },
             ) { Text("Avvia browser") }
         }
     }
 }
 
 /**
- * WebView kiosk a schermo intero.
+ * WebView kiosk a schermo intero con rotazione tra piu' URL.
  *
- * Passaggio rapido browser <-> monitor (spec §3.4): due piccoli FAB
+ * Passaggio rapido browser <-> monitor (spec §3.4): piccoli FAB
  * semitrasparenti in sovrapposizione; gli avvisi full-screen dei trigger
  * appaiono comunque sopra perche' sono un'Activity separata.
  */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun KioskWebView(
-    url: String,
+    urls: List<String>,
     reloadSeconds: Int,
+    rotationSeconds: Int,
     onBack: () -> Unit,
 ) {
     var webView by remember { mutableStateOf<WebView?>(null) }
     var loadError by remember { mutableStateOf<String?>(null) }
-    // Chiave per forzare il reload manuale ricreando la loadUrl.
+    var currentIndex by remember { mutableIntStateOf(0) }
     var reloadTick by remember { mutableIntStateOf(0) }
 
     // Ricarica automatica opzionale a intervalli (spec §3.4).
@@ -195,9 +214,19 @@ private fun KioskWebView(
         }
     }
 
-    // Carica (o ricarica) quando cambia URL o si preme il pulsante reload.
-    LaunchedEffect(url, reloadTick) {
-        webView?.loadUrl(url)
+    // Rotazione automatica tra le dashboard configurate (spec §3.6).
+    LaunchedEffect(urls, rotationSeconds) {
+        if (urls.size > 1) {
+            while (true) {
+                delay(rotationSeconds * 1000L)
+                currentIndex = (currentIndex + 1) % urls.size
+            }
+        }
+    }
+
+    // Carica la dashboard corrente (cambio URL, rotazione o reload manuale).
+    LaunchedEffect(currentIndex, reloadTick) {
+        urls.getOrNull(currentIndex)?.let { webView?.loadUrl(it) }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -256,13 +285,20 @@ private fun KioskWebView(
             }
         }
 
-        // Controlli rapidi: torna ai monitor / ricarica.
+        // Controlli rapidi: torna ai monitor / ricarica / indicatore rotazione.
         Row(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (urls.size > 1) {
+                Text(
+                    "${currentIndex + 1}/${urls.size}",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
             SmallFloatingActionButton(onClick = { reloadTick++ }) {
                 Icon(Icons.Default.Refresh, contentDescription = "Ricarica")
             }
