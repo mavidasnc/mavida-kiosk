@@ -3,10 +3,14 @@ package it.mavida.dashboardalert.ui.browser
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Bitmap
+import android.view.MotionEvent
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -39,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -158,6 +164,12 @@ private fun BrowserSetupScreen(
 
     // Scroll verticale: senza, in orientamento orizzontale i campi in basso
     // (e i pulsanti) uscirebbero dallo schermo rendendoli irraggiungibili.
+    // Surface con sfondo del tema (scuro): il tema XML della finestra e' chiaro
+    // e senza uno sfondo esplicito la schermata apparirebbe bianca.
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -205,6 +217,7 @@ private fun BrowserSetupScreen(
             ) { Text("Avvia browser") }
         }
     }
+    }
 }
 
 /**
@@ -213,6 +226,8 @@ private fun BrowserSetupScreen(
  * Passaggio rapido browser <-> monitor (spec §3.4): piccoli FAB
  * semitrasparenti in sovrapposizione; gli avvisi full-screen dei trigger
  * appaiono comunque sopra perche' sono un'Activity separata.
+ * I FAB si nascondono da soli dopo pochi secondi di inattivita' (pagina
+ * pulita) e riappaiono a un tap sullo schermo o al cambio di orientamento.
  */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -227,6 +242,21 @@ private fun KioskWebView(
     var loadError by remember { mutableStateOf<String?>(null) }
     var currentIndex by remember { mutableIntStateOf(0) }
     var reloadTick by remember { mutableIntStateOf(0) }
+
+    // Controlli a scomparsa: visibili all'ingresso, poi si nascondono dopo
+    // pochi secondi di inattivita'. Un tap sullo schermo o un cambio di
+    // orientamento li fa riapparire (e il timer riparte).
+    var controlsVisible by remember { mutableStateOf(true) }
+    var interactionTick by remember { mutableIntStateOf(0) }
+    val orientation = LocalConfiguration.current.orientation
+
+    // interactionTick (tap) e orientation (rotazione) riavviano l'effetto:
+    // i controlli tornano visibili e il conto alla rovescia riparte da zero.
+    LaunchedEffect(interactionTick, orientation) {
+        controlsVisible = true
+        delay(CONTROLS_AUTO_HIDE_MS)
+        controlsVisible = false
+    }
 
     // Ricarica automatica opzionale a intervalli (spec §3.4).
     LaunchedEffect(reloadSeconds) {
@@ -267,6 +297,14 @@ private fun KioskWebView(
                     settings.displayZoomControls = false
                     // Riproduzione media senza gesto utente (dashboard con audio/video).
                     settings.mediaPlaybackRequiresUserGesture = false
+
+                    // Un tocco sullo schermo rivela i controlli nascosti.
+                    // Il listener restituisce false: il tocco continua ad
+                    // arrivare alla pagina web (scroll, link, ecc.).
+                    setOnTouchListener { _, event ->
+                        if (event.action == MotionEvent.ACTION_DOWN) interactionTick++
+                        false
+                    }
 
                     webViewClient = object : WebViewClient() {
                         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -310,10 +348,16 @@ private fun KioskWebView(
         }
 
         // Controlli rapidi: torna ai monitor / ricarica / indicatore rotazione.
-        Row(
+        // Si nascondono da soli dopo pochi secondi; tap o rotazione li rivelano.
+        AnimatedVisibility(
+            visible = controlsVisible,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(12.dp),
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+        Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -334,5 +378,9 @@ private fun KioskWebView(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Torna ai monitor")
             }
         }
+        }
     }
 }
+
+/** Tempo di inattivita' dopo il quale i controlli del kiosk si nascondono. */
+private const val CONTROLS_AUTO_HIDE_MS = 5_000L

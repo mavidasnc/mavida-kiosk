@@ -7,6 +7,14 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-09-12
+
+### Added
+- Modalità browser kiosk: i controlli (ricarica, configura, torna ai monitor) si nascondono automaticamente dopo 5 secondi di inattività per lasciare la pagina pulita; riappaiono con un tap sullo schermo o al cambio di orientamento, e si nascondono di nuovo se non usati.
+
+### Fixed
+- Schermata di configurazione delle dashboard (opzioni del kiosk) ora con sfondo scuro e testi chiari, coerente con il tema dell'app (prima appariva con sfondo bianco).
+
 ## [0.2.2] - 2026-09-04
 
 ### Fixed
