@@ -110,7 +110,7 @@ class SettingsViewModel(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
+fun SettingsScreen(viewModel: SettingsViewModel, updateViewModel: UpdateViewModel, onBack: () -> Unit) {
     val settings by viewModel.settings.collectAsState()
     val exportedJson by viewModel.exportedJson.collectAsState()
     val message by viewModel.message.collectAsState()
@@ -212,6 +212,9 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
 
             // --- Tema notturno / dimming a fasce orarie ---
             NightModeCard(viewModel, settings)
+
+            // --- Aggiornamenti dell'app via GitHub Releases ---
+            UpdateCard(updateViewModel)
 
             // --- Backup / ripristino ---
             Card(modifier = Modifier.fillMaxWidth()) {

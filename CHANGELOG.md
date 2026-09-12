@@ -7,6 +7,14 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-12
+
+### Added
+- Auto-aggiornamento via GitHub Releases: sezione "Aggiornamenti" nelle Impostazioni con versione installata, pulsante "Verifica aggiornamenti" (confronto semver con l'ultima release del repo pubblico, nessun token richiesto) e pulsante "Aggiorna a ..." che scarica l'APK e lancia l'installazione di sistema (con richiesta guidata del permesso "fonti sconosciute" al primo uso).
+- `AppUpdater` (check `releases/latest`, download con timeout estesi, installazione via FileProvider) e permesso `REQUEST_INSTALL_PACKAGES` nel manifest.
+- 6 unit test JVM sul confronto semver (`AppUpdaterTest`).
+- README: sezione "Aggiornamento" e installazione diretta da GitHub Releases.
+
 ## [0.2.3] - 2026-09-12
 
 ### Added

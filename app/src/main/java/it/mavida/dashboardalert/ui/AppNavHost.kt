@@ -1,6 +1,7 @@
 package it.mavida.dashboardalert.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,6 +19,7 @@ import it.mavida.dashboardalert.ui.monitors.MonitorListScreen
 import it.mavida.dashboardalert.ui.monitors.MonitorListViewModel
 import it.mavida.dashboardalert.ui.settings.SettingsScreen
 import it.mavida.dashboardalert.ui.settings.SettingsViewModel
+import it.mavida.dashboardalert.ui.settings.UpdateViewModel
 
 /** Rotte di navigazione dell'app. */
 object Routes {
@@ -82,7 +84,11 @@ fun AppNavHost(container: AppContainer) {
                     SettingsViewModel(container.settingsRepository, container.configTransfer)
                 },
             )
-            SettingsScreen(viewModel = vm, onBack = { navController.popBackStack() })
+            val appContext = LocalContext.current.applicationContext
+            val updateVm: UpdateViewModel = viewModel(
+                factory = viewModelFactory { UpdateViewModel(appContext, container.appUpdater) },
+            )
+            SettingsScreen(viewModel = vm, updateViewModel = updateVm, onBack = { navController.popBackStack() })
         }
     }
 }

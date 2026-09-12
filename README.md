@@ -25,7 +25,11 @@ dispositivi senza GMS (es. Huawei recenti).
 - **Edge-trigger + cooldown**: i trigger scattano sulla transizione
   falso→vero, con cooldown anti-rimbalzo; opzione "ripeti finché vera".
 - **Modalità browser kiosk**: WebView full-screen con immersive mode, reload
-  automatico opzionale e **rotazione tra più dashboard**.
+  automatico opzionale e **rotazione tra più dashboard**. I controlli rapidi
+  (ricarica, configura, torna ai monitor) si nascondono da soli dopo pochi
+  secondi di inattività e riappaiono con un tap o al cambio di orientamento.
+- **Auto-aggiornamento**: da Impostazioni si verifica la presenza di una nuova
+  release su GitHub e si installa l'APK aggiornato direttamente dall'app.
 - **Sempre acceso**: foreground service con notifica persistente,
   `FLAG_KEEP_SCREEN_ON`, WakeLock, avvio automatico al boot, riavvio
   automatico (START_STICKY), esenzione ottimizzazione batteria e istruzioni
@@ -60,6 +64,15 @@ L'APK risultante è in `app/build/outputs/apk/debug/app-debug.apk`.
 
 ## Installazione sul telefono
 
+### Da GitHub Releases (senza PC)
+
+Scarica l'APK dell'ultima release direttamente dal browser del dispositivo:
+
+<https://github.com/mavidasnc/mavida-kiosk/releases/latest>
+
+April il file scaricato e conferma l'installazione (Android chiederà una
+volta il permesso di installare app da quella fonte).
+
 ### Via USB
 
 1. Abilita **Opzioni sviluppatore** → **Debug USB** sul dispositivo.
@@ -81,6 +94,26 @@ Comodo per iterare senza cavo. Su Android 11+:
 
 Su versioni più vecchie: collega una volta via USB, poi
 `adb tcpip 5555` e `adb connect <ip-del-telefono>:5555`.
+
+## Aggiornamento
+
+Una volta installata la 0.3.0 o successiva, gli aggiornamenti si fanno
+direttamente dall'app: **Impostazioni → Aggiornamenti → "Verifica
+aggiornamenti"** e poi **"Aggiorna a ..."**. L'app scarica l'APK dell'ultima
+release GitHub e lancia l'installazione di sistema (che chiede conferma).
+
+Note:
+
+- Alla prima richiesta Android apre la pagina "Installa app da fonti
+  sconosciute": concedi il permesso per questa app e ripeti.
+- Gli aggiornamenti funzionano solo se l'APK è firmato con lo stesso
+  certificato: le release pubblicate sono firmate con il debug keystore
+  della macchina di build. Un APK compilato su un'altra macchina va
+  installato una volta via `adb install -r` (o disinstallando prima).
+- L'installazione silenziosa (senza conferma) è possibile solo con l'app
+  impostata come *device owner* (provisioning via `adb shell dpm
+  set-device-owner` su dispositivo appena resettato): non ancora
+  implementata.
 
 ## Configurazione di un monitor di esempio
 
@@ -136,10 +169,12 @@ app/src/main/java/it/mavida/dashboardalert/
 │                             # SettingsRepository, ConfigTransfer (import/export)
 ├── polling/                  # PollingService (foreground), HttpPoller, ResponseHandler
 ├── trigger/                  # implementazioni trigger (Android) + dispatcher
+├── updater/                  # AppUpdater (auto-aggiornamento via GitHub Releases)
 ├── system/                   # OemBatteryHelper, PinLock, ConnectivityObserver
 ├── boot/                     # BootReceiver (autostart)
 └── ui/                       # schermate Compose (monitors, browser, log,
                               # settings, pin, alert)
 ```
 
-Test JVM in `app/src/test/`: `RuleEngineTest`, `TriggerStateMachineTest`.
+Test JVM in `app/src/test/`: `RuleEngineTest`, `TriggerStateMachineTest`,
+`AppUpdaterTest`.

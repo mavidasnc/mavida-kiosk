@@ -16,6 +16,7 @@ import it.mavida.dashboardalert.trigger.NotificationTrigger
 import it.mavida.dashboardalert.trigger.SoundAlertManager
 import it.mavida.dashboardalert.trigger.TriggerDispatcher
 import it.mavida.dashboardalert.trigger.VibrationTrigger
+import it.mavida.dashboardalert.updater.AppUpdater
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 
@@ -45,6 +46,9 @@ class AppContainer(context: Context) {
         .build()
 
     val httpPoller: HttpPoller = HttpPoller(okHttpClient, monitorRepository)
+
+    /** Auto-aggiornamento via GitHub Releases (Impostazioni > Aggiornamenti). */
+    val appUpdater: AppUpdater = AppUpdater(okHttpClient)
 
     /** Pipeline post-polling: log -> regole -> trigger (edge/cooldown). */
     val responseHandler: ResponseHandler by lazy {
