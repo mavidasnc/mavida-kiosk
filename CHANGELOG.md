@@ -7,6 +7,11 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-17
+
+### Added
+- Apertura automatica del browser kiosk all'avvio dell'app quando è configurato almeno un URL dashboard: la lista monitor resta nel back stack (il tasto indietro dal kiosk torna alla lista). Con PIN attivo, il kiosk si apre subito dopo lo sblocco.
+
 ## [0.3.0] - 2026-09-12
 
 ### Added

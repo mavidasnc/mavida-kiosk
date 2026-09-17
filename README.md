@@ -28,6 +28,8 @@ dispositivi senza GMS (es. Huawei recenti).
   automatico opzionale e **rotazione tra più dashboard**. I controlli rapidi
   (ricarica, configura, torna ai monitor) si nascondono da soli dopo pochi
   secondi di inattività e riappaiono con un tap o al cambio di orientamento.
+  Se è configurato almeno un URL, il kiosk si apre automaticamente all'avvio
+  dell'app (dopo l'eventuale sblocco PIN).
 - **Auto-aggiornamento**: da Impostazioni si verifica la presenza di una nuova
   release su GitHub e si installa l'APK aggiornato direttamente dall'app.
 - **Sempre acceso**: foreground service con notifica persistente,
@@ -133,7 +135,9 @@ Per il kiosk: icona **globo** nella barra in alto → inserisci l'URL della
 dashboard HTML (o più URL, uno per riga, con rotazione automatica) → "Avvia
 browser". Per **modificare** gli URL in seguito: nel kiosk tocca il FAB con
 l'**ingranaggio** (in basso a destra) e riapri la configurazione, che
-precarica gli URL già salvati.
+precarica gli URL già salvati. Con almeno un URL configurato, ai lanci
+successivi il browser kiosk si apre da solo senza passare dalla lista
+monitor.
 
 ## Note su stabilità 24/7 e limiti noti
 

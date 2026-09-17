@@ -1,6 +1,7 @@
 package it.mavida.dashboardalert.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -39,6 +40,14 @@ object Routes {
 @Composable
 fun AppNavHost(container: AppContainer) {
     val navController = rememberNavController()
+
+    // All'avvio, se è configurato almeno un URL dashboard, apri subito il browser
+    // kiosk; la rotta monitors resta nel back stack (il tasto indietro torna alla lista).
+    LaunchedEffect(Unit) {
+        if (container.settingsRepository.settings.value.browserUrls.isNotEmpty()) {
+            navController.navigate(Routes.BROWSER)
+        }
+    }
 
     NavHost(navController = navController, startDestination = Routes.MONITORS) {
         composable(Routes.MONITORS) {
